@@ -7,12 +7,12 @@ import spotipy.oauth2 as oauth2
 import youtube_dl
 from youtube_search import YoutubeSearch
 
+#cf45e290cbec4e6aa5072c5ffbf942ac
+
+#a31b60fb315a4e14a84a2ef0545f9fae
+
 # **************PLEASE READ THE README.md FOR USE INSTRUCTIONS**************
 
-def generate_token(client_id: str, client_secret: str):
-    credentials = oauth2.SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
-    token = credentials.get_access_token()
-    return token
 
 
 def write_tracks(text_file: str, tracks: dict):
@@ -48,6 +48,7 @@ def write_tracks(text_file: str, tracks: dict):
 def write_playlist(username: str, playlist_id: str):
     results = spotify.user_playlist(username, playlist_id, fields='tracks,next,name')
     playlist_name = results['name']
+    playlist_name = playlist_name.replace("/","")
     text_file = u'{0}.txt'.format(playlist_name, ok='-_()[]{}')
     print(u'Writing {0} tracks to {1}.'.format(results['tracks']['total'], text_file))
     tracks = results['tracks']
@@ -87,7 +88,10 @@ def find_and_download_songs(reference_file: str):
                 }],
             }
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([best_url])
+                try:
+                    ydl.download([best_url])
+                except Exception:
+                    print("error continueing")
 
 
 if __name__ == "__main__":
@@ -97,14 +101,21 @@ if __name__ == "__main__":
     client_secret = input("Client secret: ")
     username = input("Spotify username: ")
     playlist_uri = input("Playlist URI (excluding \"spotify:playlist:\"): ")
-    token = generate_token(client_id, client_secret)
-    spotify = spotipy.Spotify(auth=token)
-    playlist_name = write_playlist(username, playlist_uri)
-    reference_file = "{}.txt".format(playlist_name)
-    # Create the playlist folder
-    if not os.path.exists(playlist_name):
-        os.makedirs(playlist_name)
-    os.rename(reference_file, playlist_name + "/" + reference_file)
-    os.chdir(playlist_name)
-    find_and_download_songs(reference_file)
+    #playlist_uris = ["url1", "url2", "url3"] #Add multiple playlists here and uncomment if you like to download a batch 
+    playlist_uris = [playlist_uri] #comment this line if you add multiplle above.
+    auth_manager = oauth2.SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
+    spotify = spotipy.Spotify(auth_manager=auth_manager)
+    for playlist_uri in playlist_uris:
+        playlist_name = write_playlist(username, playlist_uri)
+        
+        reference_file = "{}.txt".format(playlist_name)
+        # Create the playlist folder
+        if not os.path.exists(playlist_name):
+            os.makedirs(playlist_name)
+        if not os.path.exists(playlist_name + "/" + reference_file):
+            os.rename(reference_file, playlist_name + "/" + reference_file)
+        os.chdir(playlist_name)
+        find_and_download_songs(reference_file)
+        print(playlist_uri + " complete")
     print("Operation complete.")
+
