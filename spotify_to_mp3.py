@@ -117,5 +117,6 @@ if __name__ == "__main__":
         os.chdir(playlist_name)
         find_and_download_songs(reference_file)
         print(playlist_uri + " complete")
+        os.chdir("..")
     print("Operation complete.")
 
