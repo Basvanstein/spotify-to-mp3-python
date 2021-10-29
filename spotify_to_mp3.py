@@ -7,9 +7,6 @@ import spotipy.oauth2 as oauth2
 import youtube_dl
 from youtube_search import YoutubeSearch
 
-#cf45e290cbec4e6aa5072c5ffbf942ac
-
-#a31b60fb315a4e14a84a2ef0545f9fae
 
 # **************PLEASE READ THE README.md FOR USE INSTRUCTIONS**************
 
